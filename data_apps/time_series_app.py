@@ -23,7 +23,7 @@ df_1d['sma20'] = df_1d['Close'].rolling(window=20).mean()
 
 # Calculate returns as var (%)
 df_1d["var_close"] = df_1d["Close"].pct_change(1) * 100
-df_1d["var_sma"] = (1 - (df_1d['Close'] / df_1d['sma20'])) * 100 
+df_1d["var_sma"] = (1 - (df_1d['Close'] / df_1d['sma20'])) * 100
 
 # Z-Scores
 df_1d['zscores_close'] = (df_1d['var_close'] - df_1d['var_close'].mean()) / df_1d['var_close'].std()
