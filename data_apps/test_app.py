@@ -6,6 +6,8 @@ import yfinance as yf
 
 # --- Streamlit App ---
 
+st.set_page_config(layout="wide")  # Set the page layout to wide mode
+
 st.title("Financial Data Analysis")
 
 # Define the ticker symbol
@@ -32,6 +34,12 @@ df_1d['zscores_sma'] = (df_1d['returns_sma'] - df_1d['returns_sma'].mean()) / df
 # Remove NaN values
 df_1d.dropna(subset=["returns", "returns_sma"], inplace=True)
 
+# --- Calculate Bollinger Bands ---
+df_1d['sma50'] = df_1d['Close'].rolling(window=50).mean()
+df_1d['std50'] = df_1d['Close'].rolling(window=50).std()
+df_1d['upper_ci50'] = df_1d['sma50'] + (2 * df_1d['std50'])
+df_1d['lower_ci50'] = df_1d['sma50'] - (2 * df_1d['std50'])
+
 # --- Plotting with Plotly ---
 
 # Filter data for the past year for plotting
@@ -47,6 +55,14 @@ fig.add_trace(go.Scatter(x=df_1d_plot.index, y=df_1d_plot['Close'],
 # SMA 20 line
 fig.add_trace(go.Scatter(x=df_1d_plot.index, y=df_1d_plot['sma20'], 
                          mode='lines', name='SMA 20', line=dict(color='orange')))
+
+# Bollinger Bands
+fig.add_trace(go.Scatter(x=df_1d_plot.index, y=df_1d_plot['upper_ci50'], 
+                         mode='lines', name='Upper Bollinger Band', 
+                         line=dict(color='gray', width=1)))
+fig.add_trace(go.Scatter(x=df_1d_plot.index, y=df_1d_plot['lower_ci50'], 
+                         mode='lines', name='Lower Bollinger Band', 
+                         line=dict(color='gray', width=1)))
 
 # Signals
 df_1d['position'] = 'NONE'  # Initialize POSITION column
@@ -75,4 +91,3 @@ st.plotly_chart(fig, use_container_width=True)
 # Display the DataFrame in Streamlit
 df_st = df_1d[['Open', 'High', 'Low', 'Close', 'returns', 'zscores_close', 'zscores_sma', 'position']]
 st.write(df_st.sort_index(ascending=False))
-
